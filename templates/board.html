@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task App - Board</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main>
+        <h1>Task Board <span id="board-id"></span></h1>
+        <section id="board-content">
+            <p>No tasks yet. Add one below.</p>
+            <form id="add-task-form" style="display: none;">
+                <input type="text" id="task-name" placeholder="Task name" required>
+                <button type="submit">Add Task</button>
+                <button type="button" id="cancel-add">Cancel</button>
+            </form>
+            <button id="add-task">Add New Task</button>
+        </section>
+        <button id="logout">Logout</button>
+        <p id="error"></p>
+    </main>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnnY8y4lm05tctplBbSKGIa1LQU39oJ3Q",
+            authDomain: "task-app-322ae.firebaseapp.com",
+            projectId: "task-app-322ae",
+            storageBucket: "task-app-322ae.firebasestorage.app",
+            messagingSenderId: "876428628407",
+            appId: "1:876428628407:web:986c3d36222e5576521832",
+            measurementId: "G-DMWSZG0LYG"
+        };
+
+        // Initialize Firebase
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("Firebase initialized");
+        } catch (e) {
+            console.error("Firebase init error:", e);
+            showError("Failed to connect to Firebase");
+        }
+
+        // DOM elements
+        const boardContent = document.getElementById('board-content');
+        const boardIdDisplay = document.getElementById('board-id');
+        const addTaskBtn = document.getElementById('add-task');
+        const addTaskForm = document.getElementById('add-task-form');
+        const taskNameInput = document.getElementById('task-name');
+        const cancelAddBtn = document.getElementById('cancel-add');
+        const logoutBtn = document.getElementById('logout');
+        const errorDisplay = document.getElementById('error');
+
+        // Show error or message
+        const showError = (msg) => {
+            errorDisplay.textContent = msg;
+            console.log("Message:", msg);
+        };
+
+        // Extract board_id from URL
+        const boardId = window.location.pathname.split('/').pop();
+        boardIdDisplay.textContent = boardId;
+        console.log("Board ID:", boardId);
+
+        // Monitor auth state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Logged in:", user.uid);
+                boardContent.hidden = false;
+                logoutBtn.hidden = false;
+            } else {
+                console.log("No user logged in, redirecting to login");
+                setTimeout(() => {
+                    window.location.href = '/';
+                    console.log("Redirected to /");
+                }, 100);
+            }
+        }, (e) => {
+            console.error("Auth error:", e);
+            showError("Authentication error: " + e.message);
+        });
+
+        // Toggle add task form
+        addTaskBtn.addEventListener('click', () => {
+            console.log("Add New Task clicked");
+            addTaskForm.style.display = 'flex';
+            addTaskBtn.style.display = 'none';
+            taskNameInput.focus();
+        });
+
+        // Cancel add task
+        cancelAddBtn.addEventListener('click', () => {
+            console.log("Add task cancelled");
+            addTaskForm.style.display = 'none';
+            addTaskBtn.style.display = 'block';
+            taskNameInput.value = '';
+            errorDisplay.textContent = '';
+        });
+
+        // Handle add task
+        addTaskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = taskNameInput.value.trim();
+            if (!name) {
+                showError("Task name is required");
+                return;
+            }
+
+            try {
+                console.log("Adding task:", name);
+                const user = auth.currentUser;
+                if (!user) {
+                    showError("You must be logged in");
+                    return;
+                }
+
+                const docRef = await addDoc(collection(db, `boards/${boardId}/tasks`), {
+                    name,
+                    userId: user.uid,
+                    createdAt: serverTimestamp()
+                });
+                console.log("Task created, ID:", docRef.id);
+                addTaskForm.style.display = 'none';
+                addTaskBtn.style.display = 'block';
+                taskNameInput.value = '';
+                showError("Task added successfully!");
+            } catch (e) {
+                console.error("Task creation error:", e);
+                showError("Failed to add task: " + e.message);
+            }
+        });
+
+        // Handle logout
+        logoutBtn.addEventListener('click', () => {
+            console.log("Logging out");
+            signOut(auth)
+                .then(() => {
+                    console.log("Logout success");
+                })
+                .catch((e) => {
+                    console.error("Logout error:", e);
+                    showError(e.message);
+                });
+        });
+    </script>
+</body>
+</html>

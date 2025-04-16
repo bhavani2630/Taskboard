@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task App Login</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main>
+        <h1>Task App</h1>
+        <section id="auth-form">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button id="login">Login</button>
+            <button id="signup">Sign Up</button>
+            <button id="logout" hidden>Logout</button>
+        </section>
+        <p id="error"></p>
+    </main>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnnY8y4lm05tctplBbSKGIa1LQU39oJ3Q",
+            authDomain: "task-app-322ae.firebaseapp.com",
+            projectId: "task-app-322ae",
+            storageBucket: "task-app-322ae.firebasestorage.app",
+            messagingSenderId: "876428628407",
+            appId: "1:876428628407:web:986c3d36222e5576521832",
+            measurementId: "G-DMWSZG0LYG"
+        };
+
+        // Initialize Firebase
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("Firebase initialized");
+        } catch (e) {
+            console.error("Firebase init error:", e);
+            showError("Failed to connect to Firebase");
+        }
+
+        // DOM elements
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login');
+        const signupBtn = document.getElementById('signup');
+        const logoutBtn = document.getElementById('logout');
+        const errorDisplay = document.getElementById('error');
+        const authForm = document.getElementById('auth-form');
+
+        const showError = (msg) => {
+            errorDisplay.textContent = msg;
+            console.log("Error:", msg);
+        };
+
+        // Monitor auth state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Logged in:", user.uid);
+                authForm.hidden = true;
+                logoutBtn.hidden = false;
+                setTimeout(() => {
+                    window.location.href = '/boards';
+                }, 100);
+            } else {
+                console.log("No user logged in");
+                authForm.hidden = false;
+                logoutBtn.hidden = true;
+            }
+        }, (e) => {
+            console.error("Auth error:", e);
+            showError("Authentication error: " + e.message);
+        });
+
+        // Login
+        loginBtn.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            if (!email || !password) {
+                showError("Email and password required");
+                return;
+            }
+            signInWithEmailAndPassword(auth, email, password)
+                .then((cred) => {
+                    console.log("Login success:", cred.user.uid);
+                })
+                .catch((e) => {
+                    console.error("Login error:", e);
+                    showError(e.message);
+                });
+        });
+
+        // Sign up
+        signupBtn.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            if (!email || !password) {
+                showError("Email and password required");
+                return;
+            }
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(async (cred) => {
+                    console.log("Signup success:", cred.user.uid);
+                    await setDoc(doc(db, "users", cred.user.uid), {
+                        email: email,
+                        createdAt: serverTimestamp()
+                    });
+                })
+                .catch((e) => {
+                    console.error("Signup error:", e);
+                    showError(e.message);
+                });
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    console.log("Logout success");
+                })
+                .catch((e) => {
+                    console.error("Logout error:", e);
+                    showError(e.message);
+                });
+        });
+    </script>
+</body>
+</html>

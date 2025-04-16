@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task App - Boards</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main>
+        <h1>Task Boards</h1>
+        <section id="boards-list">
+            <p>No boards yet. Create one below.</p>
+            <form id="create-board-form" style="display: none;">
+                <input type="text" id="board-name" placeholder="Board name" required>
+                <button type="submit">Create</button>
+                <button type="button" id="cancel-create">Cancel</button>
+            </form>
+            <button id="create-board">Create New Board</button>
+        </section>
+        <button id="logout">Logout</button>
+        <p id="error"></p>
+    </main>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnnY8y4lm05tctplBbSKGIa1LQU39oJ3Q",
+            authDomain: "task-app-322ae.firebaseapp.com",
+            projectId: "task-app-322ae",
+            storageBucket: "task-app-322ae.firebasestorage.app",
+            messagingSenderId: "876428628407",
+            appId: "1:876428628407:web:986c3d36222e5576521832",
+            measurementId: "G-DMWSZG0LYG"
+        };
+
+        // Initialize Firebase
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("Firebase initialized");
+        } catch (e) {
+            console.error("Firebase init error:", e);
+            showError("Failed to connect to Firebase");
+        }
+
+        // DOM elements
+        const boardsList = document.getElementById('boards-list');
+        const createBoardBtn = document.getElementById('create-board');
+        const createBoardForm = document.getElementById('create-board-form');
+        const boardNameInput = document.getElementById('board-name');
+        const cancelCreateBtn = document.getElementById('cancel-create');
+        const logoutBtn = document.getElementById('logout');
+        const errorDisplay = document.getElementById('error');
+
+        // Show error or message
+        const showError = (msg) => {
+            errorDisplay.textContent = msg;
+            console.log("Message:", msg);
+        };
+
+        // Monitor auth state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Logged in:", user.uid);
+                boardsList.hidden = false;
+                logoutBtn.hidden = false;
+            } else {
+                console.log("No user logged in, redirecting to login");
+                setTimeout(() => {
+                    window.location.href = '/';
+                    console.log("Redirected to /");
+                }, 100);
+            }
+        }, (e) => {
+            console.error("Auth error:", e);
+            showError("Authentication error: " + e.message);
+        });
+
+        // Toggle create board form
+        createBoardBtn.addEventListener('click', () => {
+            console.log("Create New Board clicked");
+            createBoardForm.style.display = 'flex';
+            createBoardBtn.style.display = 'none';
+            boardNameInput.focus();
+        });
+
+        // Cancel create board
+        cancelCreateBtn.addEventListener('click', () => {
+            console.log("Create board cancelled");
+            createBoardForm.style.display = 'none';
+            createBoardBtn.style.display = 'block';
+            boardNameInput.value = '';
+            errorDisplay.textContent = '';
+        });
+
+        // Handle create board
+        createBoardForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = boardNameInput.value.trim();
+            if (!name) {
+                showError("Board name is required");
+                return;
+            }
+
+            try {
+                console.log("Creating board:", name);
+                const user = auth.currentUser;
+                if (!user) {
+                    showError("You must be logged in");
+                    return;
+                }
+
+                const docRef = await addDoc(collection(db, 'boards'), {
+                    name,
+                    userId: user.uid,
+                    createdAt: serverTimestamp()
+                });
+                console.log("Board created, ID:", docRef.id);
+                createBoardForm.style.display = 'none';
+                createBoardBtn.style.display = 'block';
+                boardNameInput.value = '';
+                window.location.href = `/board/${docRef.id}`;
+            } catch (e) {
+                console.error("Board creation error:", e);
+                showError("Failed to create board: " + e.message);
+            }
+        });
+
+        // Handle logout
+        logoutBtn.addEventListener('click', () => {
+            console.log("Logging out");
+            signOut(auth)
+                .then(() => {
+                    console.log("Logout success");
+                })
+                .catch((e) => {
+                    console.error("Logout error:", e);
+                    showError(e.message);
+                });
+        });
+    </script>
+</body>
+</html>
