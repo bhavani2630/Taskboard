@@ -1,0 +1,360 @@
+/* Custom properties for theming and animations */
+:root {
+    --primary-gradient: linear-gradient(45deg, #3b82f6, #a855f7);
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --shadow-color: rgba(0, 0, 0, 0.15);
+    --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --glow-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Enhanced global styles with smooth scrolling and font optimization */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%) fixed;
+    color: #2d3748;
+    line-height: 1.7;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    isolation: isolate;
+}
+
+/* Advanced container with 3D perspective and micro-interactions */
+.container {
+    max-width: 1000px;
+    margin: 48px auto;
+    padding: 40px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 24px;
+    box-shadow: 0 12px 48px var(--shadow-color);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    animation: floatIn 1s var(--transition-ease);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Floating entrance animation */
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translateY(80px) rotateX(10deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+    }
+}
+
+/* Subtle parallax background effect */
+.container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), transparent 70%);
+    z-index: -1;
+    transform: translateZ(-20px);
+    animation: pulseGlow 8s infinite var(--transition-ease);
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* Headings with animated gradient and 3D hover */
+h1, h2 {
+    font-variation-settings: 'wght' 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 32px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.4s var(--transition-ease);
+}
+
+h1::after, h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--primary-gradient);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--transition-ease);
+}
+
+h1:hover, h2:hover {
+    transform: translateZ(10px) rotateX(5deg);
+}
+
+h1:hover::after, h2:hover::after {
+    transform: scaleX(1);
+}
+
+/* Input fields with advanced focus states and micro-animations */
+input {
+    padding: 14px 18px;
+    margin: 12px 6px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s var(--transition-ease);
+    position: relative;
+    z-index: 1;
+}
+
+input:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow: 0 0 0 4px var(--glow-color), inset 0 2px 6px rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px) scale(1.01);
+    background: #fff;
+}
+
+/* Input ripple effect on focus */
+input::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+input:focus::after {
+    opacity: 1;
+}
+
+/* Button with advanced particle effect and 3D press */
+button {
+    padding: 14px 28px;
+    margin: 12px 6px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary-gradient);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: all 0.3s var(--transition-ease);
+    z-index: 1;
+}
+
+button:hover {
+    transform: translateZ(8px) rotateX(-2deg);
+    box-shadow: 0 8px 24px var(--glow-color);
+}
+
+button:disabled {
+    background: linear-gradient(45deg, #d1d5db, #e5e7eb);
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* Advanced particle effect on button click */
+button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 255, 255, 0.4), transparent 50%);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.2s ease;
+}
+
+button:active::before {
+    opacity: 1;
+    transition: opacity 0s;
+}
+
+/* List with scroll-driven animations */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0;
+    perspective: 800px;
+}
+
+li {
+    padding: 20px;
+    margin: 16px 0;
+    background: #ffffff;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 6px 24px var(--shadow-color);
+    transform: translateZ(-20px) rotateX(10deg);
+    opacity: 0;
+    animation: revealItem 0.8s var(--transition-ease) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Scroll-driven staggered animation */
+@supports (animation-timeline: scroll()) {
+    li {
+        animation: revealItem 0.8s var(--transition-ease) forwards;
+        animation-timeline: view();
+        animation-range: entry 10% cover 50%;
+    }
+}
+
+@keyframes revealItem {
+    to {
+        opacity: 1;
+        transform: translateZ(0) rotateX(0);
+    }
+}
+
+/* Hover with 3D tilt effect */
+li:hover {
+    transform: translateZ(10px) rotateX(-2deg);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s var(--transition-ease);
+}
+
+/* Links with advanced hover trail effect */
+a {
+    color: #3b82f6;
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
+}
+
+a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+    transform: translateX(-100%);
+    z-index: -1;
+    transition: transform 0.5s var(--transition-ease);
+}
+
+a:hover::before {
+    transform: translateX(100%);
+}
+
+a:hover {
+    color: #1d4ed8;
+}
+
+/* Unassigned task with advanced neon pulse */
+.task-unassigned {
+    background: #fee2e2;
+    position: relative;
+    isolation: isolate;
+}
+
+.task-unassigned::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+    animation: neonPulse 2s infinite var(--transition-ease);
+    z-index: -1;
+}
+
+@keyframes neonPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+
+/* Error message with advanced glitch effect */
+#error-message {
+    color: #dc2626;
+    font-weight: 600;
+    position: relative;
+    animation: glitch 0.5s ease;
+}
+
+@keyframes glitch {
+    0% { transform: translate(0); opacity: 1; }
+    20% { transform: translate(-4px, 2px); opacity: 0.8; }
+    40% { transform: translate(4px, -2px); opacity: 0.6; }
+    60% { transform: translate(-2px, 1px); }
+    80% { transform: translate(2px, -1px); }
+    100% { transform: translate(0); opacity: 1; }
+}
+
+/* Task counters with animated reveal */
+#task-counters {
+    margin: 24px 0;
+    font-weight: 700;
+    color: #4b5563;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: counterReveal 1.2s var(--transition-ease) forwards 0.6s;
+    position: relative;
+}
+
+@keyframes counterReveal {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Advanced responsive adjustments with container queries */
+@container (max-width: 768px) {
+    .container {
+        margin: 24px;
+        padding: 32px;
+        border-radius: 16px;
+    }
+
+    button, input {
+        width: 100%;
+        margin: 12px 0;
+        font-size: 1.1rem;
+    }
+
+    li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    h1, h2 {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+    }
+}
+
+/* High-resolution displays */
+@media (min-resolution: 2dppx) {
+    .container {
+        backdrop-filter: blur(24px) saturate(200%);
+    }
+
+    button, input, li {
+        box-shadow: 0 8px 32px var(--shadow-color);
+    }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+}
